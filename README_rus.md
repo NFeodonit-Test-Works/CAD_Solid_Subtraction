@@ -1,6 +1,6 @@
 # Тестовая работа по САПР, вычитание кинематического тела из параллелепипеда
 
-Task text in English and its solution are available [on the link](README.md).
+The task text and the description of its solution in English are available [on the link](README.md).
 
 ## Описание задачи
 

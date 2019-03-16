@@ -1,6 +1,6 @@
 # CAD Test Work, Subtract the Kinematic Solid from the Parallelepiped
 
-Русский текст задания и его решение смотрите [по ссылке](README_rus.md).
+Текст задания и описание его решения на русском доступны [по ссылке](README_rus.md).
 
 ## Task
 

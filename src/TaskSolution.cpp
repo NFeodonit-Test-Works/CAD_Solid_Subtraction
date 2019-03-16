@@ -61,7 +61,12 @@ void KinematicSolid::fillPoints(const Solid& solid)
   //auto cylCloud = mPoints.cloud()[cylSlice];
 
 
-  ULongBbox ulb = doubleToULongBbox(solid.bbox(), mPoints.gridDelta());
+  // Check the points of the PointCloud only in the Bbox of the Solid
+  // merged with the Bbox of the PointCloud.
+  DoubleBbox dbb = solid.bbox();
+  dbb.merge(mPoints.bbox());
+  ULongBbox ulb = doubleToULongBbox(dbb, mPoints.gridDelta());
+
   ULong cloudSize = mPoints.cloud().size();
   ULong numYX = mPoints.numberY() * mPoints.numberX();
 

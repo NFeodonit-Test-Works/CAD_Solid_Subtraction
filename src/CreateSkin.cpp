@@ -12,9 +12,6 @@ void CreateSkin(const cadcam::mwTPoint3d<double> refPoint,
     const double delta,
     const std::string& skinFileName)
 {
-  twm::PointCloud points(refPoint, nx, ny, nz, delta);
-  twm::Sphere sphere({0, 0, 0}, sphereRad);
-  twm::KinematicSolid kinSolid(points, sphere, func, deltaT, false);
-  kinSolid.build();
-  twm::FileWriter::write(points, skinFileName);
+  twm::TaskSolution::createSkin(
+      refPoint, nx, ny, nz, sphereRad, func, deltaT, delta, skinFileName);
 }

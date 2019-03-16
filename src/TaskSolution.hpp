@@ -38,8 +38,9 @@ namespace twm
 template <typename T>
 using Point = cadcam::mwTPoint3d<T>;
 
+using ULong = unsigned long;
 using DoublePoint = Point<double>;
-using ULongPoint = Point<unsigned long>;
+using ULongPoint = Point<ULong>;
 
 
 template <typename T>
@@ -167,20 +168,20 @@ inline void Bbox<T>::move(const Point<T>& delta)
 }
 
 using DoubleBbox = Bbox<double>;
-using ULongBbox = Bbox<unsigned long>;
+using ULongBbox = Bbox<ULong>;
 
 inline ULongBbox doubleToULongBbox(const DoubleBbox& dbb, double gridDelta)
 {
   DoublePoint min = dbb.min() / gridDelta;
   DoublePoint max = dbb.max() / gridDelta;
 
-  ULongPoint umin(static_cast<unsigned long>(std::floor(min.x())),
-      static_cast<unsigned long>(std::floor(min.y())),
-      static_cast<unsigned long>(std::floor(min.z())));
+  ULongPoint umin(static_cast<ULong>(std::floor(min.x())),
+      static_cast<ULong>(std::floor(min.y())),
+      static_cast<ULong>(std::floor(min.z())));
 
-  ULongPoint umax(static_cast<unsigned long>(std::ceil(max.x())),
-      static_cast<unsigned long>(std::ceil(max.y())),
-      static_cast<unsigned long>(std::ceil(max.z())));
+  ULongPoint umax(static_cast<ULong>(std::ceil(max.x())),
+      static_cast<ULong>(std::ceil(max.y())),
+      static_cast<ULong>(std::ceil(max.z())));
 
   return {umin, umax};
 }
@@ -323,16 +324,16 @@ public:
   PointCloud& operator=(PointCloud&&) = delete;
 
   PointCloud(const DoublePoint& referencePoint,
-      unsigned long nx,
-      unsigned long ny,
-      unsigned long nz,
+      ULong nx,
+      ULong ny,
+      ULong nz,
       double gridDelta);
 
   ~PointCloud() override;
 
-  unsigned long numberX() const { return mNumberX; }
-  unsigned long numberY() const { return mNumberY; }
-  unsigned long numberZ() const { return mNumberZ; }
+  ULong numberX() const { return mNumberX; }
+  ULong numberY() const { return mNumberY; }
+  ULong numberZ() const { return mNumberZ; }
   double gridDelta() const { return mGridDelta; }
 
   std::valarray<bool>& cloud() { return mCloud; }
@@ -351,13 +352,13 @@ private:
   const DoublePoint mReferencePoint;
 
   // Number of points in x direction
-  const unsigned long mNumberX;
+  const ULong mNumberX;
 
   // Number of points in y direction
-  const unsigned long mNumberY;
+  const ULong mNumberY;
 
   // Number of points in z direction
-  const unsigned long mNumberZ;
+  const ULong mNumberZ;
 
   // Distance between points in the point grid (same fo x, y and z directions)
   const double mGridDelta;
@@ -367,9 +368,9 @@ private:
 };
 
 inline PointCloud::PointCloud(const DoublePoint& referencePoint,
-    unsigned long nx,
-    unsigned long ny,
-    unsigned long nz,
+    ULong nx,
+    ULong ny,
+    ULong nz,
     double gridDelta)
     : mReferencePoint(referencePoint)
     , mNumberX(nx)
@@ -462,9 +463,9 @@ class TaskSolution
 {
 public:
   static void createSkin(const DoublePoint& refPoint,
-      const unsigned long nx,
-      const unsigned long ny,
-      const unsigned long nz,
+      const ULong nx,
+      const ULong ny,
+      const ULong nz,
       const double sphereRad,
       mwDiscreteFunction& func,
       const double deltaT,
@@ -474,9 +475,9 @@ public:
 
 // static
 inline void TaskSolution::createSkin(const DoublePoint& refPoint,
-    const unsigned long nx,
-    const unsigned long ny,
-    const unsigned long nz,
+    const ULong nx,
+    const ULong ny,
+    const ULong nz,
     const double sphereRad,
     mwDiscreteFunction& func,
     const double deltaT,

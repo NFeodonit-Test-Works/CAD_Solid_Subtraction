@@ -41,11 +41,11 @@ void KinematicSolid::fillPoints(const Solid& solid)
 {
   //  2D -- start, {sizeY, sizeX}(of slice), {sizeX of src, step in X}
   //  3D -- z*sizeY*sizeX + y*sizeX + x, {sizeZ, sizeY, sizeX}(of slice), {sizeY*sizeX of src, sizeX of src, step in X}
-  //unsigned long sHW = sUB.height() * sUB.width();
-  //unsigned long sStart =
+  //ULong sHW = sUB.height() * sUB.width();
+  //ULong sStart =
   //    sUB.minZ() * sHW + sUB.minY() * sUB.height() + sUB.minX();
-  //unsigned long cHW = cUB.height() * cUB.width();
-  //unsigned long cStart =
+  //ULong cHW = cUB.height() * cUB.width();
+  //ULong cStart =
   //    cUB.minZ() * cHW + cUB.minY() * cUB.height() + cUB.minX();
   //std::gslice sphSlice(sStart, {sUB.depth(), sUB.height(), sUB.width()},
   //    {sHW, sUB.width(), 1});
@@ -55,13 +55,13 @@ void KinematicSolid::fillPoints(const Solid& solid)
   //auto cylCloud = mPoints.cloud()[cylSlice];
 
   ULongBbox ulb = doubleToULongBbox(solid.bbox(), mPoints.gridDelta());
-  unsigned long cloudSize = mPoints.cloud().size();
-  unsigned long numYX = mPoints.numberY() * mPoints.numberX();
+  ULong cloudSize = mPoints.cloud().size();
+  ULong numYX = mPoints.numberY() * mPoints.numberX();
 
-  for(unsigned long m = ulb.minZ(), maxZ = ulb.maxZ(); m <= maxZ; ++m) {
-    for(unsigned long k = ulb.minY(), maxY = ulb.maxY(); k <= maxY; ++k) {
-      for(unsigned long i = ulb.minX(), maxX = ulb.maxX(); i <= maxX; ++i) {
-        unsigned long idx = m * numYX + k * mPoints.numberX() + i;
+  for(ULong m = ulb.minZ(), maxZ = ulb.maxZ(); m <= maxZ; ++m) {
+    for(ULong k = ulb.minY(), maxY = ulb.maxY(); k <= maxY; ++k) {
+      for(ULong i = ulb.minX(), maxX = ulb.maxX(); i <= maxX; ++i) {
+        ULong idx = m * numYX + k * mPoints.numberX() + i;
         if(idx >= cloudSize || mPoints.cloud()[idx] ^ !mFiller) {
           continue;
         }
@@ -110,16 +110,16 @@ void FileWriter::write(
   std::ofstream out(skinFileName);
   out.precision(std::numeric_limits<double>::max_digits10);
 
-  unsigned long cloudSize = points.cloud().size();
-  unsigned long numYX = points.numberY() * points.numberX();
+  ULong cloudSize = points.cloud().size();
+  ULong numYX = points.numberY() * points.numberX();
 
-  for(unsigned long k = 0, sizeY = points.numberY(); k < sizeY; ++k) {
-    for(unsigned long i = 0, sizeX = points.numberX(); i < sizeX; ++i) {
-      unsigned long sizeZ = points.numberZ();
-      unsigned long m = sizeZ;
+  for(ULong k = 0, sizeY = points.numberY(); k < sizeY; ++k) {
+    for(ULong i = 0, sizeX = points.numberX(); i < sizeX; ++i) {
+      ULong sizeZ = points.numberZ();
+      ULong m = sizeZ;
 
       while(m > 0) {
-        unsigned long idx = (m - 1) * numYX + k * sizeX + i;
+        ULong idx = (m - 1) * numYX + k * sizeX + i;
         if(idx >= cloudSize || !points.cloud()[idx]) {
           --m;
           continue;

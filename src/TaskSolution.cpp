@@ -140,14 +140,15 @@ void FileWriter::write(
   std::ofstream out(skinFileName);
   out.precision(std::numeric_limits<double>::max_digits10);
 
+  ULong sizeX = points.numberX();
+  ULong sizeY = points.numberY();
+  ULong sizeZ = points.numberZ();
   ULong cloudSize = points.cloud().size();
   ULong numYX = points.numberY() * points.numberX();
 
-  for(ULong k = 0, sizeY = points.numberY(); k < sizeY; ++k) {
-    for(ULong i = 0, sizeX = points.numberX(); i < sizeX; ++i) {
-      ULong sizeZ = points.numberZ();
+  for(ULong k = 0; k < sizeY; ++k) {
+    for(ULong i = 0; i < sizeX; ++i) {
       ULong m = sizeZ;
-
       while(m > 0) {
         // Check the array boundaries.
         // Search 1st undeleted ('true') point, skip deleted ('false') points.

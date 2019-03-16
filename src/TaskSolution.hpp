@@ -242,6 +242,7 @@ inline Sphere::Sphere(const DoublePoint& center, double radius)
 
 inline void Sphere::setCenter(const DoublePoint& center)
 {
+  // Subtraction of the each component of the 3d point from the another 3d point.
   mBbox.move(center - mCenter);
   mCenter = center;
 }
@@ -250,11 +251,15 @@ inline void Sphere::setCenter(const DoublePoint& center)
 inline DoubleBbox Sphere::setBbox()
 {
   DoublePoint r(mRadius, mRadius, mRadius);
+  // Subtraction and addition of the each component
+  // of the 3d point to the another 3d point.
   return {mCenter - r, mCenter + r};
 }
 
 inline bool Sphere::contains(const DoublePoint& point) const
 {
+  // Subtraction of the each component of the 3d point from the another 3d point.
+  // Length of vector between two points less then mRadius.
   return ~(point - mCenter) <= mRadius;
 }
 
@@ -296,19 +301,36 @@ inline Cylinder::Cylinder(
     , mPt2(pt2)
     , mVector(mPt2 - mPt1)
     , mRadius(radius)
-    , mRadiusMultVectorLength(mRadius * ~mVector)
+    , mRadiusMultVectorLength(mRadius * ~mVector)  // ~ -- length of vector.
     , mBbox(setBbox())
 {
 }
 
 inline DoubleBbox Cylinder::setBbox()
 {
+  // Set the inaccurate Bbox for Cylinder by two Spheres at the ends.
   DoubleBbox sb = Sphere(mPt1, mRadius).bbox();
   return sb.merge(Sphere(mPt2, mRadius).bbox());
 }
 
 inline bool Cylinder::contains(const DoublePoint& point) const
 {
+  // * -- dot product of vectors
+  // % -- cross product of vectors
+  // ~ -- vector length, |AB|
+  //
+  // Check if point lies between the planes of the two circular facets
+  // of the cylinder and ...
+  // (point - mPt1) * (mPt2 - mPt1) >= 0.0
+  // &&
+  // (point - mPt2) * (mPt2 - mPt1) <= 0.0
+  // &&
+  //
+  // ... check if point lies inside the curved surface of the cylinder.
+  // |(point - mPt1) % (mPt2 - mPt1)|
+  // -------------------------------- <= mRadius
+  //           |mPt2 - mPt1|
+  //
   return ((point - mPt1) * mVector) >= 0.0 && ((point - mPt2) * mVector) <= 0.0
       && ~((point - mPt1) % mVector) <= mRadiusMultVectorLength;
 }
@@ -378,6 +400,7 @@ inline PointCloud::PointCloud(const DoublePoint& referencePoint,
     , mNumberZ(nz)
     , mGridDelta(gridDelta)
     , mBbox(setBbox())
+    // Fill PointCloud with undeleted ('true') points.
     , mCloud(true, mNumberX * mNumberY * mNumberZ)
 {
 }
@@ -385,6 +408,7 @@ inline PointCloud::PointCloud(const DoublePoint& referencePoint,
 inline DoublePoint PointCloud::ulongPointToCoordinate(
     const ULongPoint& ulongPt) const
 {
+  // * -- multiplicate each 3d component of point with mGridDelta constant.
   return DoublePoint(ulongPt.x(), ulongPt.y(), ulongPt.z()) * mGridDelta
       + mReferencePoint;
 }
@@ -423,7 +447,7 @@ public:
 
   void build();
 
-  // Solid interface
+  // Solid interface, is not used.
   const DoubleBbox& bbox() const override { return mBbox; }
   bool contains(const DoublePoint&) const override { return false; }
 
@@ -432,7 +456,7 @@ private:
 
   PointCloud& mPoints;
   Sphere& mSphere;
-  const mwDiscreteFunction& mFunc;
+  const mwDiscreteFunction& mFunc;  // User's function for the Sphere motion.
   const double mDeltaT;
   bool mFiller;
   DoubleBbox mBbox;
@@ -484,10 +508,21 @@ inline void TaskSolution::createSkin(const DoublePoint& refPoint,
     const double delta,
     const std::string& skinFileName)
 {
+  // Fill the PointCloud with 'true' points in the given Bbox.
   twm::PointCloud points(refPoint, nx, ny, nz, delta);
+
+  // Set the params of the Sphere.
   twm::Sphere sphere({0, 0, 0}, sphereRad);
+
+  // Set the params of the KinematicSolid. Filler is 'false'.
   twm::KinematicSolid kinSolid(points, sphere, func, deltaT, false);
+
+  // Fill the KinematicSolid with 'false' points
+  // in the given PointCloud, with Sphere motion by user's function.
   kinSolid.build();
+
+  // Write only the uppermost points from the resulting solid,
+  // which have the largest value of the coordinates along the Z axis.
   twm::FileWriter::write(points, skinFileName);
 }
 

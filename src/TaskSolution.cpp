@@ -39,33 +39,50 @@ KinematicSolid::~KinematicSolid() = default;
 
 void KinematicSolid::fillPoints(const Solid& solid)
 {
+  // These notes is about using of the std::valarray.
+  //
   //  2D -- start, {sizeY, sizeX}(of slice), {sizeX of src, step in X}
   //  3D -- z*sizeY*sizeX + y*sizeX + x, {sizeZ, sizeY, sizeX}(of slice), {sizeY*sizeX of src, sizeX of src, step in X}
+  //
   //ULong sHW = sUB.height() * sUB.width();
   //ULong sStart =
   //    sUB.minZ() * sHW + sUB.minY() * sUB.height() + sUB.minX();
+  //
   //ULong cHW = cUB.height() * cUB.width();
   //ULong cStart =
   //    cUB.minZ() * cHW + cUB.minY() * cUB.height() + cUB.minX();
+  //
   //std::gslice sphSlice(sStart, {sUB.depth(), sUB.height(), sUB.width()},
   //    {sHW, sUB.width(), 1});
   //std::gslice cylSlice(cStart, {cUB.depth(), cUB.height(), cUB.width()},
   //    {cHW, cUB.width(), 1});
+  //
   //auto sphCloud = mPoints.cloud()[sphSlice];
   //auto cylCloud = mPoints.cloud()[cylSlice];
+
 
   ULongBbox ulb = doubleToULongBbox(solid.bbox(), mPoints.gridDelta());
   ULong cloudSize = mPoints.cloud().size();
   ULong numYX = mPoints.numberY() * mPoints.numberX();
 
+  // Set the points of the PointCloud, which belong to given Solid, to mFiller.
   for(ULong m = ulb.minZ(), maxZ = ulb.maxZ(); m <= maxZ; ++m) {
     for(ULong k = ulb.minY(), maxY = ulb.maxY(); k <= maxY; ++k) {
       for(ULong i = ulb.minX(), maxX = ulb.maxX(); i <= maxX; ++i) {
+        // Get the point index from ULong coordinates.
         ULong idx = m * numYX + k * mPoints.numberX() + i;
+
+        // Check the array boundaries.
+        // Check if point of PointCloud is already filled.
         if(idx >= cloudSize || mPoints.cloud()[idx] ^ !mFiller) {
           continue;
         }
+
+        // Get the normal point coordinates from ULong coordinates.
         DoublePoint dPt = mPoints.ulongPointToCoordinate({i, k, m});
+
+        // Check if the point belongs to the solid. If it belongs, then fill
+        // the point of PointCloud with mFiller, otherwise with !mFiller.
         bool val = !mFiller ^ solid.contains(dPt);
         mPoints.cloud()[idx] = val;
       }
@@ -75,6 +92,7 @@ void KinematicSolid::fillPoints(const Solid& solid)
 
 void KinematicSolid::build()
 {
+  // Get 1st and last values of t from the user's function.
   double t = mFunc.GetBeginParameter();
   double end = mFunc.GetEndParameter();
 
@@ -84,20 +102,26 @@ void KinematicSolid::build()
       t2 = end;
     }
 
+    // Get next points from the user's function.
     DoublePoint pT = mFunc.Evaluate(t);
     DoublePoint pT2 = mFunc.Evaluate(t2);
 
+    // Fill Sphere (at given point pT of center) with mFiller.
     mSphere.setCenter(pT);
     fillPoints(mSphere);
 
+    // Fill Cylinder (with given radius and between given points pT and pT2)
+    // with mFiller.
     Cylinder cylinder(pT, pT2, mSphere.radius());
     fillPoints(cylinder);
 
     t += mDeltaT;
   }
 
+  // Get last point from the user's function.
   DoublePoint pEnd = mFunc.Evaluate(end);
 
+  // Fill last Sphere (at given point pEnd of center) with mFiller.
   mSphere.setCenter(pEnd);
   fillPoints(mSphere);
 }
@@ -107,6 +131,7 @@ void KinematicSolid::build()
 void FileWriter::write(
     const PointCloud& points, const std::string& skinFileName)
 {
+  // Write the points of the PointCloud to the file.
   std::ofstream out(skinFileName);
   out.precision(std::numeric_limits<double>::max_digits10);
 
@@ -119,16 +144,20 @@ void FileWriter::write(
       ULong m = sizeZ;
 
       while(m > 0) {
+        // Check the array boundaries.
+        // Search 1st undeleted ('true') point, skip deleted ('false') points.
         ULong idx = (m - 1) * numYX + k * sizeX + i;
         if(idx >= cloudSize || !points.cloud()[idx]) {
           --m;
           continue;
         }
 
+        // Write only the uppermost points from the resulting Subtracted Solid,
+        // which have the largest value of the coordinates along the Z axis.
         DoublePoint coord = points.ulongPointToCoordinate({i, k, m - 1});
         out << coord.x() << " " << coord.y() << " " << coord.z() << "\n";
-//        --m;
         m = 0;
+//        --m;  // ... or all undeleted ('true') points.
       }
     }
   }

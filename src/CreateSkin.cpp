@@ -1,5 +1,7 @@
 #include "CreateSkin.hpp"
 
+#include "TaskSolution.hpp"
+
 void CreateSkin(const cadcam::mwTPoint3d<double> refPoint,
     const unsigned long nx,
     const unsigned long ny,
@@ -10,7 +12,9 @@ void CreateSkin(const cadcam::mwTPoint3d<double> refPoint,
     const double delta,
     const std::string& skinFileName)
 {
-
-  //Your source code here...
-
+  twm::PointCloud points(refPoint, nx, ny, nz, delta);
+  twm::Sphere sphere({0, 0, 0}, sphereRad);
+  twm::KinematicSolid kinSolid(points, sphere, func, deltaT, false);
+  kinSolid.build();
+  twm::FileWriter::write(points, skinFileName);
 }

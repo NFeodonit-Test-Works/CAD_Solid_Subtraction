@@ -509,13 +509,13 @@ inline void TaskSolution::createSkin(const DoublePoint& refPoint,
     const std::string& skinFileName)
 {
   // Fill the PointCloud with 'true' points in the given Bbox.
-  twm::PointCloud points(refPoint, nx, ny, nz, delta);
+  PointCloud points(refPoint, nx, ny, nz, delta);
 
   // Set the params of the Sphere.
-  twm::Sphere sphere({0, 0, 0}, sphereRad);
+  Sphere sphere({0, 0, 0}, sphereRad);
 
   // Set the params of the KinematicSolid. Filler is 'false'.
-  twm::KinematicSolid kinSolid(points, sphere, func, deltaT, false);
+  KinematicSolid kinSolid(points, sphere, func, deltaT, false);
 
   // Fill the KinematicSolid with 'false' points
   // in the given PointCloud, with Sphere motion by user's function.
@@ -523,7 +523,7 @@ inline void TaskSolution::createSkin(const DoublePoint& refPoint,
 
   // Write only the uppermost points from the resulting solid,
   // which have the largest value of the coordinates along the Z axis.
-  twm::FileWriter::write(points, skinFileName);
+  FileWriter::write(points, skinFileName);
 }
 
 
